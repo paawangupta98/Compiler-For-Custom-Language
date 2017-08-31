@@ -60,7 +60,14 @@ extern int yydebug;
     DO_EQL = 270,
     NOT_EQL = 271,
     FOR = 272,
-    WHILE = 273
+    WHILE = 273,
+    STRING = 274,
+    PRINT = 275,
+    PRINTLN = 276,
+    READ = 277,
+    IF = 278,
+    ELSE = 279,
+    GOTO = 280
   };
 #endif
 

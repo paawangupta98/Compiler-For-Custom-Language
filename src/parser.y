@@ -28,6 +28,13 @@
 %token NOT_EQL
 %token FOR
 %token WHILE
+%token STRING
+%token PRINT
+%token PRINTLN
+%token READ
+%token IF
+%token ELSE
+%token GOTO
 
 %%
 
@@ -35,29 +42,42 @@ program:	declblock codeblock
 
 declblock: decl_block '{' dec_state '}'
 
-dec_state: INT_TYPE declare_var STOP dec_state | INT_TYPE declare_var STOP
+dec_state: |INT_TYPE declare_var STOP dec_state
 
 declare_var: many_ways ',' declare_var|many_ways
 
 many_ways: ID | ID '[' INTEGER ']'
 
-codeblock: code_block '{' statement '}'
+codeblock: code_block '{'statement_seg '}'
 
-statement: FOR_LOOP | WHILE_LOOP | simple | print_state
+statement_seg: |statement statement_seg
+statement: ID ':' | FOR_LOOP |  WHILE_LOOP |  simple |  print_state |  println_state |  read_state |  IF_ELSE | GOTO_EXP |STOP
 
-simple: ID '=' single_expr STOP | ID STOP | INTEGER STOP
-single_expr: single_expr '+' FINALTERM | single_expr '*' FINALTERM| ID | INTEGER
+simple: ID '=' single_expr STOP | ID '[' FINALTERM ']' '=' single_expr STOP | ID STOP | INTEGER STOP
+single_expr: single_expr '+' FINALTERM | single_expr '*' FINALTERM| FINALTERM
 
-FOR_LOOP: FOR syntaxforloop '{'statement'}'
+GOTO_EXP: GOTO ID STOP| GOTO ID  IF expr STOP
+
+FOR_LOOP: FOR syntaxforloop '{'statement_seg'}'
 syntaxforloop: ID '=' INTEGER ',' INTEGER ',' INTEGER | ID '=' INTEGER ',' INTEGER
 
-WHILE_LOOP: WHILE expr '{' statement'}'
+WHILE_LOOP: WHILE expr '{' statement_seg'}'
 expr: TERM OR expr | TERM
-TERM: SIM AND TERM | SIM
-SIM: SIM '%' FINALTERM |SIM '+' FINALTERM |SIM '-' FINALTERM |SIM '*' FINALTERM | SIM '/' FINALTERM| ID | INTEGER
-FINALTERM: ID | INTEGER
+TERM: FIRST_COMP AND TERM | FIRST_COMP
+FIRST_COMP: SIM EX_OP SIM
+SIM: SIM OP FINALTERM | FINALTERM
+FINALTERM: ID | INTEGER | ID '['FINALTERM ']'
 
-print_state: PRINT 
+OP: '+'|'-'|'*'|'/'|'%'
+EX_OP: LE | GE | DO_EQL | NOT_EQL | '<' | '>' | '='
+
+IF_ELSE: IF expr '{' statement_seg'}' ELSE '{' statement_seg'}' | IF expr '{' statement_seg'}'
+
+print_state: PRINT print_expr STOP
+print_expr: print_expr ',' FINALTERM | print_expr ',' STRING | STRING | FINALTERM
+println_state: PRINTLN STRING STOP | PRINTLN STOP
+
+read_state: READ ID STOP | READ ID '[' FINALTERM ']' STOP
 %%
 
 void yyerror (char const *s)
