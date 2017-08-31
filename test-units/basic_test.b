@@ -1,7 +1,7 @@
-decl_block{
+declblock{
 	
 }
 
-code_block{
+codeblock{
 	
 }

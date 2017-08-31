@@ -2,8 +2,8 @@
 #include "parser.tab.h"
 %}
 %%
-"code_block"					{return code_block;}
-"decl_block"					{return decl_block;}
+"codeblock"					{return code_block;}
+"declblock"					{return decl_block;}
 "{"								{return '{';}
 "}"								{return '}';}
 ","								{return ',';}

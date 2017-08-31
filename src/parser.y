@@ -54,7 +54,7 @@ statement_seg: |statement statement_seg
 statement: ID ':' | FOR_LOOP |  WHILE_LOOP |  simple |  print_state |  println_state |  read_state |  IF_ELSE | GOTO_EXP |STOP
 
 simple: ID '=' single_expr STOP | ID '[' FINALTERM ']' '=' single_expr STOP | ID STOP | INTEGER STOP
-single_expr: single_expr '+' FINALTERM | single_expr '*' FINALTERM| FINALTERM
+single_expr: single_expr OP FINALTERM| FINALTERM
 
 GOTO_EXP: GOTO ID STOP| GOTO ID  IF expr STOP
 

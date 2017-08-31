@@ -1,9 +1,9 @@
-decl_block{
+declblock{
 	int data[100];
 	int i, sum;
 }
 
-code_block{
+codeblock{
 	for i = 1, 100 {
 		data[i] = i;
 	}
