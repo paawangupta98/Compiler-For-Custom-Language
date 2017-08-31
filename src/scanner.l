@@ -1,26 +1,40 @@
 %{
 #include "parser.tab.h"
 %}
-
 %%
-"declaration_list"			return declaration_list;
-"statement_list"		return statement_list;
-[0-9][0-9]*	{  
-			printf("Token type: Number, Lexeme/Token Value: %s\n", yytext);  
-			return NUMBER; 
-                }
-[a-zA-Z][a-zA-Z0-9]* {  
-			printf("Token type: Identifier, Lexeme/Token Value: %s\n", yytext);  
-			return IDENTIFIER; 
-		     } 
-"+"		return '+';
-"-"		return '-';
-"*"		return '*';
-"{"		return '{';
-"}"		return '}';
-
-[ \t]		{ /* Do nothing */ }
-.		{ 
-		  printf("Unexpected token encountered: %s\n", yytext); 
-		  return ETOK;
-		}
+"code_block"					{return code_block;}
+"decl_block"					{return decl_block;}
+"{"								{return '{';}
+"}"								{return '}';}
+","								{return ',';}
+";"								{return STOP;}
+"for"							{return FOR;}
+"while"							{return WHILE;}
+"void" 							{return VOID; }
+"int" 							{return INT_TYPE; }
+"and"							{return AND;}
+"&&"							{return AND;}
+"or"							{return OR;}
+"||"							{return OR;}
+"not"							{return NOT;}
+"!="							{return NOT_EQL;}
+"!"								{return NOT;}
+"["								{return '[';}
+"]"								{return ']';}
+"=="							{return DO_EQL;}
+"="								{return '=';}
+"<="							{return LE;}
+">="							{return GE;}
+"<"								{return '<';}
+">"								{return '>';}
+"+"								{return '+';}
+"-"								{return '-';}
+"*"								{return '*';}
+"/"								{return '/';}
+"%"								{return '%';}
+[0-9]+							{return INTEGER;}
+[a-zA-Z][0-9a-zA-Z]*			{return ID; }
+""
+[ \t\n]							{ /* Do nothing */ ;}
+. 								{printf("Unexpected token encountered: %s\n", yytext);}
+%%

@@ -6,30 +6,58 @@
   void yyerror (char const *s);
 %}
 
-%token declaration_list
-%token statement_list
-%token NUMBER
-%token IDENTIFIER
-%token ETOK
+/*  TOKENS */
+%token INTEGER
+%token ID
+%token INT_TYPE
+%token VOID
+%token code_block
+%token decl_block
+%token STOP
+%token AND
+%token OR
+%token NOT
 %left '+'
+%left '-'
 %left '*'
+%left '/'
+%left '%'
+%token LE
+%token GE
+%token DO_EQL
+%token NOT_EQL
+%token FOR
+%token WHILE
 
 %%
 
-program:	decl_block code_block
+program:	declblock codeblock
 
-decl_block:  '{' declaration_list '}'
+declblock: decl_block '{' dec_state '}'
 
-code_block:  '{' statement_list '}'
+dec_state: INT_TYPE declare_var STOP dec_state | INT_TYPE declare_var STOP
 
-/*
-expr	: 	expr '+' expr 
-	|	expr '*' expr 
-	| 	NUMBER
-	|	IDENTIFIER
-	;
-*/
+declare_var: many_ways ',' declare_var|many_ways
 
+many_ways: ID | ID '[' INTEGER ']'
+
+codeblock: code_block '{' statement '}'
+
+statement: FOR_LOOP | WHILE_LOOP | simple | print_state
+
+simple: ID '=' single_expr STOP | ID STOP | INTEGER STOP
+single_expr: single_expr '+' FINALTERM | single_expr '*' FINALTERM| ID | INTEGER
+
+FOR_LOOP: FOR syntaxforloop '{'statement'}'
+syntaxforloop: ID '=' INTEGER ',' INTEGER ',' INTEGER | ID '=' INTEGER ',' INTEGER
+
+WHILE_LOOP: WHILE expr '{' statement'}'
+expr: TERM OR expr | TERM
+TERM: SIM AND TERM | SIM
+SIM: SIM '%' FINALTERM |SIM '+' FINALTERM |SIM '-' FINALTERM |SIM '*' FINALTERM | SIM '/' FINALTERM| ID | INTEGER
+FINALTERM: ID | INTEGER
+
+print_state: PRINT 
 %%
 
 void yyerror (char const *s)
