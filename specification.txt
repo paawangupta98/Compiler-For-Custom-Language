@@ -1,4 +1,6 @@
-1. Data Types
+1. decl_block{ ALL DEFINITIONS HERE}
+2. code_block{ ALL OTHER STATEMENTS HERE}
+3 Data Types
 
 Inegers and Array of Integers.
 
@@ -9,9 +11,11 @@ All the variables have to be declared in the declblock{....} before being used
 in the codeblock{...}. Multiple variables can be declared in the statement 
 and each declaration statement ends with a semi-colon. 
 
-2. Expressions
+4. Expressions
+Operator Precendece :=
+Logical operator > Relational Operator > AND > OR
 
-3. for loop
+5. for loop
 
 for i = 1, 100 {
 	.....
@@ -21,7 +25,7 @@ for i = 1, 100, 2 {
 	.....
 }
 
-4. if-else statement
+6. if-else statement
 
 	if expression {
 	....
@@ -35,7 +39,7 @@ for i = 1, 100, 2 {
 	....
 	}
 
-5. while statment
+7. while statment
 
 	while expression {
 
@@ -43,7 +47,7 @@ for i = 1, 100, 2 {
 
 6. conditional and unconditional goto
 
-	got label
+	goto label
 
 	goto label if expression
 
