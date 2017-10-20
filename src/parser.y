@@ -12,7 +12,7 @@
 %}
 
 /*  TOKENS */
-%start programhead
+%start program
 %token <intval> INTEGER
 %token <stringval> ID
 %token INT_TYPE
