@@ -1,18 +1,9 @@
-%option noyywrap
-%option nounput
-%option yylineno
 %{
-#include <bits/stdc++.h>
-using namespace std;
-#define YY_DECL extern "C" int yylex()
-#include "ast.h"
 #include "parser.tab.h"
-extern union Node yylval;
 %}
-string (\\n|\\t|\\'|\\\\|\\\"|[^\\"'])
 %%
-"codeblock"						{return code_block;}
-"declblock"						{return decl_block;}
+"codeblock"					{return code_block;}
+"declblock"					{return decl_block;}
 "{"								{return '{';}
 "}"								{return '}';}
 ","								{return ',';}
@@ -25,7 +16,7 @@ string (\\n|\\t|\\'|\\\\|\\\"|[^\\"'])
 "if"							{return IF;}
 "else"							{return ELSE;}
 "void" 							{return VOID; }
-"int" 							{return INT_TYPE;cout<<"INT"; }
+"int" 							{return INT_TYPE; }
 "goto"							{return GOTO;}
 "and"							{return AND;}
 "&&"							{return AND;}
@@ -48,9 +39,9 @@ string (\\n|\\t|\\'|\\\\|\\\"|[^\\"'])
 "/"								{return '/';}
 "%"								{return '%';}
 ":"								{return ':';}
-[0-9]+							{yylval.intval = atoi(yytext);return INTEGER;}
-[a-zA-Z][0-9a-zA-Z]*			{yylval.stringval = strdup(yytext);return ID; }
-\"{string}*\"					{yylval.stringval = strdup(yytext);return STRING; }
+[0-9]+							{return INTEGER;}
+[a-zA-Z][0-9a-zA-Z]*			{return ID; }
+ \"(\\.|[^\\"])*\"				{return STRING; }
 [ \t\n]							{ /* Do nothing */ ;}
-. 								{;}
+. 								{printf("Unexpected token encountered: %s\n", yytext);}
 %%

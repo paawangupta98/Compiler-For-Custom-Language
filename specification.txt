@@ -39,7 +39,7 @@ for i = 1, 100, 2 {
 	....
 	}
 
-7. while statement
+7. while statment
 
 	while expression {
 
