@@ -12,7 +12,7 @@
 %}
 
 /*  TOKENS */
-%start program
+%start programhead
 %token <intval> INTEGER
 %token <stringval> ID
 %token INT_TYPE
@@ -61,7 +61,7 @@
 
 %%
 
-program:	decl_block '{' dec_states '}'  code_block '{'statement_seg '}' {$$ = new ASTProgram($3 , $7);}
+program:	decl_block '{' dec_states '}'  code_block '{'statement_seg '}' {$$ = new ASTProgram($3 , $7);programhead = $$;}
 
 dec_states: {$$ = new std::vector<ASTDeclBlock *> ;}
 			| dec_state dec_states {$2->push_back($1); $$=$2;}

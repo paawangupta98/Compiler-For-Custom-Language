@@ -1,7 +1,7 @@
 #include "ast.h"
 #include <bits/stdc++.h>
 using namespace std;
-ASTProgram * programhead;
+ASTProgram * programhead = NULL;
 extern "C" FILE *yyin;
 extern "C" int yyparse();
 extern "C" int yylex();
