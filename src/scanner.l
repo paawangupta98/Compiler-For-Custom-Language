@@ -1,17 +1,32 @@
+%option noyywrap
+%option nounput
+%option yylineno
 %{
+#include <bits/stdc++.h>
+using namespace std;
+#define YY_DECL extern "C" int yylex()
+#include "ast.h"
 #include "parser.tab.h"
+extern union Node yylval;
 %}
+string (\\n|\\t|\\'|\\\\|\\\"|[^\\"'])
 %%
-"code_block"					{return code_block;}
-"decl_block"					{return decl_block;}
+"codeblock"						{return code_block;}
+"declblock"						{return decl_block;}
 "{"								{return '{';}
 "}"								{return '}';}
 ","								{return ',';}
 ";"								{return STOP;}
 "for"							{return FOR;}
 "while"							{return WHILE;}
+"print"							{return PRINT;}
+"println"						{return PRINTLN;}
+"read"							{return READ;}
+"if"							{return IF;}
+"else"							{return ELSE;}
 "void" 							{return VOID; }
-"int" 							{return INT_TYPE; }
+"int" 							{return INT_TYPE;cout<<"INT"; }
+"goto"							{return GOTO;}
 "and"							{return AND;}
 "&&"							{return AND;}
 "or"							{return OR;}
@@ -32,9 +47,10 @@
 "*"								{return '*';}
 "/"								{return '/';}
 "%"								{return '%';}
-[0-9]+							{return INTEGER;}
-[a-zA-Z][0-9a-zA-Z]*			{return ID; }
-""
+":"								{return ':';}
+[0-9]+							{yylval.intval = atoi(yytext);return INTEGER;}
+[a-zA-Z][0-9a-zA-Z]*			{yylval.stringval = strdup(yytext);return ID; }
+\"{string}*\"					{yylval.stringval = strdup(yytext);return STRING; }
 [ \t\n]							{ /* Do nothing */ ;}
-. 								{printf("Unexpected token encountered: %s\n", yytext);}
+. 								{;}
 %%

@@ -60,16 +60,18 @@ extern int yydebug;
     DO_EQL = 270,
     NOT_EQL = 271,
     FOR = 272,
-    WHILE = 273
+    WHILE = 273,
+    STRING = 274,
+    PRINT = 275,
+    PRINTLN = 276,
+    READ = 277,
+    IF = 278,
+    ELSE = 279,
+    GOTO = 280
   };
 #endif
 
 /* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
-#endif
 
 
 extern YYSTYPE yylval;
