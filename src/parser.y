@@ -106,11 +106,11 @@ FIRST_COMP: single_expr LE single_expr {$$ = new ASTfirstexpr($1 , relative_op::
 			| single_expr '>' single_expr {$$ = new ASTfirstexpr($1 , relative_op::greater_than , $3);}
 			| single_expr '=' single_expr {$$ = new ASTfirstexpr($1 , relative_op::equal , $3);}
 
-single_expr: single_expr '+' FINALTERM {$$ = new ASTbinaryexpr($1 ,arithematic_op::plus , $3);}
-			|single_expr '-' FINALTERM {$$ = new ASTbinaryexpr($1 ,arithematic_op::sub  , $3);}
-			|single_expr '*' FINALTERM {$$ = new ASTbinaryexpr($1 ,arithematic_op::mult  , $3);}
-			|single_expr '/' FINALTERM {$$ = new ASTbinaryexpr($1 ,arithematic_op::div  , $3);}
-			|single_expr '%' FINALTERM {$$ = new ASTbinaryexpr($1 ,arithematic_op::mod  , $3);}
+single_expr: single_expr '+' single_expr {$$ = new ASTbinaryexpr($1 ,arithematic_op::plus , $3);}
+			|single_expr '-' single_expr {$$ = new ASTbinaryexpr($1 ,arithematic_op::sub  , $3);}
+			|single_expr '*' single_expr {$$ = new ASTbinaryexpr($1 ,arithematic_op::mult  , $3);}
+			|single_expr '/' single_expr {$$ = new ASTbinaryexpr($1 ,arithematic_op::div  , $3);}
+			|single_expr '%' single_expr {$$ = new ASTbinaryexpr($1 ,arithematic_op::mod  , $3);}
 			|FINALTERM {$$ = $1;}
 FINALTERM: 	ID {$$ = new ASTvalue("id" , $1);}
 			| INTEGER {$$ = new ASTvalue("int" , $1);}

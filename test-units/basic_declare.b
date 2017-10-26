@@ -2,7 +2,7 @@ declblock{
 	int x0;
 	int ar[102],yar;
 	int max;
-	int sum,n;
+	int sum,x;
 	int n;
 	int i;
 }
@@ -25,6 +25,7 @@ codeblock{
 		sum = sum + ar[i];
 		i = i+1;
 	}
-	print sum , max;
+	x = 6+5*5%4+4;
+	print x , sum , max;
 	println "end";
 }
