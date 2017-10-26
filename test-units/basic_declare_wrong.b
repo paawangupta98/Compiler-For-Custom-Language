@@ -4,5 +4,5 @@ declblock{
 }
 
 codeblock{
-	
+	l1: 5
 }

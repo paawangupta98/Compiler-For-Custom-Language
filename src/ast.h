@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include "visitor.h"
 #define TAB 1
 
 using namespace std;
@@ -100,6 +101,9 @@ class ASTProgram {
         ~ASTProgram() {}
         vector<ASTDeclBlock*>* getdeclBlock(){return this->declBlock;}
         vector<ASTstatement*>* getcodeBlock(){ return this->codeBlock; }
+        void * accept(Visitors  * v) {
+            return v->visit(this);
+        }
 };
 
 
@@ -112,6 +116,9 @@ class ASTDeclBlock {
 
         datatype getType(){ return this -> type; }
         vector < ASTidvariable *> * getIdList(){ return this -> idvector; }
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTidvariable{
@@ -125,12 +132,16 @@ class ASTidvariable{
         string getId(){ return this -> id; }
         string getTyped(){return this->typed;}
         int getSize(){return this->size;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTstatement{
     public:
         ASTstatement() {}
         ~ASTstatement(){}
+        virtual void * accept(Visitors *v) = 0;
 };
 
 class ASTlabel : public ASTstatement{
@@ -139,22 +150,28 @@ class ASTlabel : public ASTstatement{
         ASTlabel(string label) {this->label=label;}
         ~ASTlabel(){}
         string getlabel(){return this->label;} 
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTforloop : public ASTstatement{
     string id;
-    int step;
-    int start;
-    int end;
+    ASTvalue * step;
+    ASTvalue * start;
+    ASTvalue * end;
     std::vector<ASTstatement*>* substate;
     public:
-        ASTforloop(string id , int step , int start , int end , vector <ASTstatement*>* substate) {this->id = id;this->start = start; this->end = end; this->step=step;this->substate=substate;}
+        ASTforloop(string id , ASTvalue * start , ASTvalue * end , ASTvalue * step , vector <ASTstatement*>* substate) {this->id = id;this->start = start; this->end = end; this->step=step;this->substate=substate;}
         ~ASTforloop() {}
-    string getid(){ return this->id;}
-    int getstep(){ return this->step;}
-    int getstart(){ return this->start;}
-    int getend(){ return this->end;}
-    vector <ASTstatement*>* getsubstate(){ return this->substate;}
+        string getId(){ return this->id;}
+        ASTvalue * getstep(){ return this->step;}
+        ASTvalue * getstart(){ return this->start;}
+        ASTvalue * getend(){ return this->end;}
+        vector <ASTstatement*>* getsubstate(){ return this->substate;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTwhileloop : public ASTstatement{
@@ -165,21 +182,27 @@ class ASTwhileloop : public ASTstatement{
         ~ASTwhileloop() {}
         ASTexpression* getexpr(){ return this->expr;}
         vector <ASTstatement*>* getsubstate(){ return this->substate;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTassignment : public ASTstatement{
     string typed;
     string id;
-    ASTvalue * finalterm;
+    ASTsingleexpr * finalterm;
     ASTsingleexpr * expr1;
     public:
+        ASTassignment(string typed , string id , ASTsingleexpr * finalterm ,ASTsingleexpr * expr1 ){this->typed = typed; this->id=id;this->expr1=expr1;this->finalterm=finalterm;}
         ASTassignment(string typed , string id , ASTsingleexpr * expr1 ){this->typed = typed; this->id=id;this->expr1=expr1;}
-        ASTassignment(string typed , string id , ASTvalue * finalterm ,ASTsingleexpr * expr1 ){this->typed = typed; this->id=id;this->expr1=expr1;this->finalterm=finalterm;}
         ~ASTassignment(){}
         string getTyped(){return this->typed;}
         string getId(){return this->id;}
         ASTsingleexpr * getexpr(){return this->expr1;}
-        ASTvalue * getval(){return this->finalterm;}
+        ASTsingleexpr * getval(){return this->finalterm;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTgoto : public ASTstatement{
@@ -190,19 +213,25 @@ class ASTgoto : public ASTstatement{
         ~ASTgoto(){}
         string getId(){return this->id;}
         ASTexpression * getexpr(){return this->expr1;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTread : public ASTstatement{
     string typed;
     string id;
-    ASTvalue * finalterm;
+    ASTsingleexpr * finalterm;
     public:
-        ASTread(string typed , string id , ASTvalue * finalterm ){this->typed=typed;this->id=id;this->finalterm=finalterm;}
+        ASTread(string typed , string id , ASTsingleexpr * finalterm ){this->typed=typed;this->id=id;this->finalterm=finalterm;}
         ASTread(string typed , string id ){this->typed=typed;this->id=id;this->finalterm=NULL;}
         ~ASTread(){}
         string getTyped(){return this->typed;}
         string getId(){return this->id;}
-        ASTvalue * getval(){return this->finalterm;}
+        ASTsingleexpr * getval(){return this->finalterm;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTif : public ASTstatement{
@@ -213,6 +242,9 @@ class ASTif : public ASTstatement{
         ~ASTif() {}
         ASTexpression* getexpr(){ return this->expr;}
         vector <ASTstatement*>* getsubstate(){ return this->substate;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTifelse : public ASTstatement{
@@ -225,6 +257,9 @@ class ASTifelse : public ASTstatement{
         ASTexpression* getexpr(){ return this->expr;}
         vector <ASTstatement*>* getsubstate1(){ return this->substate1;}
         vector <ASTstatement*>* getsubstate2(){ return this->substate2;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTprint : public ASTstatement{
@@ -233,6 +268,9 @@ class ASTprint : public ASTstatement{
         ASTprint(std::vector<ASTprintexpr*>* substate) {this->substate=substate;}
         ~ASTprint() {}
         vector <ASTprintexpr*>* getsubstate(){ return this->substate;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTprintexpr{
@@ -241,16 +279,22 @@ class ASTprintexpr{
     public:
         ASTprintexpr(ASTvalue * val,string str){this->val = val;this->str=str;}
         ~ASTprintexpr(){}
-        ASTvalue * getval(){return this->val;};
-        string getstring(){return this->str;};
+        ASTvalue * getval(){return this->val;}
+        string getstring(){return this->str;}
+        void * accept(Visitors *v , int x) {
+            return v->visit(this , x);
+        }
 };
 
 class ASTprintln : public ASTstatement{
-    string str;
+    std::vector<ASTprintexpr*>* substate;
     public:
-        ASTprintln(string str){this->str=str;}
-        ~ASTprintln(){}
-        string getstring(){return this->str;};
+        ASTprintln(std::vector<ASTprintexpr*>* substate) {this->substate=substate;}
+        ~ASTprintln() {}
+        vector <ASTprintexpr*>* getsubstate(){ return this->substate;}
+        void * accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTexpression {
@@ -258,7 +302,10 @@ class ASTexpression {
     public:
         ASTexpression(std::vector<ASTtermexpr*>* term) {this->term = term;}
         ~ASTexpression() {}
-        std::vector<ASTtermexpr*>* getterm(){return this->term;};
+        std::vector<ASTtermexpr*>* getterm(){return this->term;}
+        bool accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTtermexpr {
@@ -267,6 +314,9 @@ class ASTtermexpr {
         ASTtermexpr(std::vector<ASTfirstexpr*>* v){this->firstexpr=v;}
         ~ASTtermexpr(){}
         std::vector<ASTfirstexpr*>* getfirstexpr(){return this->firstexpr;}
+        bool accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTfirstexpr {
@@ -277,14 +327,18 @@ class ASTfirstexpr {
         ASTfirstexpr(ASTsingleexpr * left , relative_op op , ASTsingleexpr * right){this->left = left;this->op=op;this->right=right;}
         ~ASTfirstexpr(){}
         ASTsingleexpr * getleft(){return this->left;}
-        ASTsingleexpr * getlright(){return this->right;}
+        ASTsingleexpr * getright(){return this->right;}
         relative_op getrelop(){return this->op;}
+        bool accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTsingleexpr {
     public:
         ASTsingleexpr(){}
         ~ASTsingleexpr(){}
+        virtual int  accept(Visitors *v) = 0 ;
 };
 
 class ASTvalue : public ASTsingleexpr{
@@ -301,6 +355,9 @@ class ASTvalue : public ASTsingleexpr{
         string getId(){return this->id;}
         int getval(){return this->val;}
         ASTsingleexpr * getexpr(){return this->expr1;}
+        int  accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 
 class ASTbinaryexpr : public ASTsingleexpr{
@@ -311,7 +368,10 @@ class ASTbinaryexpr : public ASTsingleexpr{
         ASTbinaryexpr(ASTsingleexpr * left , arithematic_op op , ASTsingleexpr * right){this->left = left;this->op=op;this->right=right;}
         ~ASTbinaryexpr(){}
         ASTsingleexpr * getleft(){return this->left;}
-        ASTsingleexpr * getlright(){return this->right;}
+        ASTsingleexpr * getright(){return this->right;}
         arithematic_op getariop(){return this->op;}
+        int  accept(Visitors *v) {
+            return v->visit(this);
+        }
 };
 

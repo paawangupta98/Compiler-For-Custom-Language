@@ -1,4 +1,5 @@
 #include "ast.h"
+
 #include <bits/stdc++.h>
 using namespace std;
 ASTProgram * programhead = NULL;
@@ -21,5 +22,6 @@ int main(int argc, char** argv) {
     do {
         yyparse();
     } while (!feof(yyin));
-    
+    Visitors * startvisitor = new Visitors();
+    programhead->accept(startvisitor);
 }

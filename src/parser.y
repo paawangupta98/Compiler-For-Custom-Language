@@ -77,18 +77,17 @@ statement_seg: {$$ = new std::vector<ASTstatement*>;}
 			|statement statement_seg {$2->push_back($1); $$=$2;}
 statement:	ID ':' {$$ = new ASTlabel($1);}
 			| STOP {$$=NULL;}
-			| FOR ID '=' INTEGER ',' INTEGER ',' INTEGER '{' statement_seg '}' {$$ = new ASTforloop($2 , $4 , $6 , $8 , $10);}
-			| FOR ID '=' INTEGER ',' INTEGER '{' statement_seg '}' {$$ = new ASTforloop($2 , $4 , $6 , 1 , $8);}
+			| FOR ID '=' FINALTERM ',' FINALTERM ',' FINALTERM '{' statement_seg '}' {$$ = new ASTforloop($2 , $4 , $6 , $8 , $10);}
+			| FOR ID '=' FINALTERM ',' FINALTERM '{' statement_seg '}' {$$ = new ASTforloop($2 , $4 , $6 , new ASTvalue("int" , 1) , $8);}
 			| WHILE expr '{' statement_seg'}' {$$ = new ASTwhileloop($2 , $4); }
 			| ID '=' single_expr STOP {$$ = new ASTassignment( "id" , $1 , $3);}
-			| ID '[' FINALTERM ']' '=' single_expr STOP {new ASTassignment("array" , $1 , $3 , $6);}
+			| ID '[' single_expr ']' '=' single_expr STOP {$$ = new ASTassignment("array" , $1 , $3 , $6);}
 			| ID STOP {$$ = NULL;}
 			| INTEGER STOP{$$ = NULL;}
 			| GOTO ID STOP {$$ = new ASTgoto($2 , NULL);}
 			| GOTO ID IF expr STOP {$$ = new ASTgoto($2 , $4);}
 			| PRINT print_expr STOP {$$ = new ASTprint($2);}
-			| PRINTLN STRING STOP {$$ = new ASTprintln($2); }
-			| PRINTLN STOP {$$ = new ASTprintln(NULL); }
+			| PRINTLN print_expr STOP {$$ = new ASTprintln($2); }
 			| read_state {$$ = $1;}
 			| IF_ELSE {$$=$1;}
 
@@ -103,8 +102,8 @@ FIRST_COMP: single_expr LE single_expr {$$ = new ASTfirstexpr($1 , relative_op::
 			| single_expr GE single_expr {$$ = new ASTfirstexpr($1 , relative_op::greater_than_equal , $3);}
 			| single_expr DO_EQL single_expr {$$ = new ASTfirstexpr($1 , relative_op::double_equal , $3);}
 			| single_expr NOT_EQL single_expr {$$ = new ASTfirstexpr($1 , relative_op::not_equal , $3);}
-			| single_expr '<' single_expr {$$ = new ASTfirstexpr($1 , relative_op::greater_than , $3);}
-			| single_expr '>' single_expr {$$ = new ASTfirstexpr($1 , relative_op::less_than , $3);}
+			| single_expr '<' single_expr {$$ = new ASTfirstexpr($1 , relative_op::less_than , $3);}
+			| single_expr '>' single_expr {$$ = new ASTfirstexpr($1 , relative_op::greater_than , $3);}
 			| single_expr '=' single_expr {$$ = new ASTfirstexpr($1 , relative_op::equal , $3);}
 
 single_expr: single_expr '+' FINALTERM {$$ = new ASTbinaryexpr($1 ,arithematic_op::plus , $3);}
@@ -127,7 +126,7 @@ print_expr:   FINALTERM ',' print_expr {$3->push_back(new ASTprintexpr($1 , ""))
 			| FINALTERM {	$$ = new std::vector<ASTprintexpr*> ;  $$->push_back(new ASTprintexpr( $1 , ""));}
 
 read_state:   READ ID STOP {$$ = new ASTread("int" , $2);}
-			| READ ID '[' FINALTERM ']' STOP {$$ = new ASTread("array" , $2 , $4);}
+			| READ ID '[' single_expr ']' STOP {$$ = new ASTread("array" , $2 , $4);}
 %%
 
 void yyerror (char const *s)
