@@ -73,10 +73,10 @@ declare_var: ID ',' declare_var  {$3->push_back(new ASTidvariable("id" , $1 , 0)
 			| ID  {$$ = new std::vector<ASTidvariable *>; $$->push_back(new ASTidvariable("id",$1 , 0)); }
 			| ID '[' INTEGER ']' {$$ = new std::vector<ASTidvariable *>; $$->push_back(new ASTidvariable("array",$1, $3));}
 
-statement_seg: {$$ = new std::vector<ASTstatement*>;}
-			|statement statement_seg {$2->push_back($1); $$=$2;}
-statement:	ID ':' {$$ = new ASTlabel($1);}
-			| STOP {$$=NULL;}
+statement_seg: {$$ = new std::vector<pair<ASTstatement* , string> >;}
+			|statement statement_seg {$2->push_back(make_pair($1 , "")); $$=$2;}
+			|ID ':' statement statement_seg{$4->push_back(make_pair($3 , $1)); $$=$4;}
+statement: STOP {$$=NULL;}
 			| FOR ID '=' FINALTERM ',' FINALTERM ',' FINALTERM '{' statement_seg '}' {$$ = new ASTforloop($2 , $4 , $6 , $8 , $10);}
 			| FOR ID '=' FINALTERM ',' FINALTERM '{' statement_seg '}' {$$ = new ASTforloop($2 , $4 , $6 , new ASTvalue("int" , 1) , $8);}
 			| WHILE expr '{' statement_seg'}' {$$ = new ASTwhileloop($2 , $4); }
