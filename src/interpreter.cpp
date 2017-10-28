@@ -101,12 +101,16 @@ int Visitors::visit (class ASTprint * node)
 
 int Visitors::visit (class ASTprintln * node)
 {
-	if(node->getsubstate())
+	if((node->getsubstate())->size()>0)
 	{
 		for (auto it = (*node->getsubstate()).rbegin(); it != (*node->getsubstate()).rend(); ++it)
 		{
 			(*it)->accept(this , 1);
 		}
+	}
+	else
+	{
+		cout<<"\n";
 	}
 	return 0;
 }

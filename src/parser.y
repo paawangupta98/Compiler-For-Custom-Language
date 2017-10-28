@@ -124,6 +124,7 @@ print_expr:   FINALTERM ',' print_expr {$3->push_back(new ASTprintexpr($1 , ""))
 			| STRING ',' print_expr {$3->push_back(new ASTprintexpr(NULL , $1)) , $$ = $3;}
 			| STRING {$$ = new std::vector<ASTprintexpr*> ;  $$->push_back(new ASTprintexpr(NULL , $1));}
 			| FINALTERM {	$$ = new std::vector<ASTprintexpr*> ;  $$->push_back(new ASTprintexpr( $1 , ""));}
+			| {	$$ = new std::vector<ASTprintexpr*> ; }
 
 read_state:   READ ID STOP {$$ = new ASTread("int" , $2);}
 			| READ ID '[' single_expr ']' STOP {$$ = new ASTread("array" , $2 , $4);}

@@ -396,7 +396,7 @@ union yyalloc
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  17
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  56
+#define YYNRULES  57
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  138
 
@@ -452,7 +452,7 @@ static const yytype_uint8 yyrline[] =
       86,    87,    88,    89,    90,    91,    92,    94,    96,    97,
       98,    99,   100,   101,   102,   103,   104,   105,   106,   107,
      109,   110,   111,   112,   113,   114,   115,   116,   117,   119,
-     120,   123,   124,   125,   126,   128,   129
+     120,   123,   124,   125,   126,   127,   129,   130
 };
 #endif
 
@@ -521,17 +521,17 @@ static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     3,     1,     0,     0,     3,     8,     0,
        0,     4,     0,     0,     5,     0,     6,     0,    10,     9,
-       0,     0,    13,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,    13,     0,     0,    55,    55,     0,     0,     0,
        0,    10,    26,    25,     0,    20,    19,     0,     0,     0,
        0,    47,    46,     0,    27,    29,    30,    32,     0,    45,
       53,    54,     0,     0,     0,     0,     0,     2,    11,     7,
        0,     0,    10,     0,     0,     0,    10,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    23,    24,    55,     0,    10,    21,     0,
+       0,    55,    55,    23,    24,    56,     0,    10,    21,     0,
        0,    12,    17,     0,     0,     0,    28,    31,    40,    41,
       42,    43,    44,    33,    34,    35,    36,    39,    37,    38,
       52,    51,     0,     0,     0,     0,     0,    48,    16,     0,
-      50,    22,     0,     0,    56,     0,    18,    10,     0,    10,
+      50,    22,     0,     0,    57,     0,    18,    10,     0,    10,
        0,     0,     0,    15,    10,    49,     0,    14
 };
 
@@ -624,7 +624,7 @@ static const yytype_uint8 yyr1[] =
       46,    46,    46,    46,    46,    46,    46,    47,    48,    48,
       49,    50,    50,    51,    51,    51,    51,    51,    51,    51,
       52,    52,    52,    52,    52,    52,    53,    53,    53,    54,
-      54,    55,    55,    55,    55,    56,    56
+      54,    55,    55,    55,    55,    55,    56,    56
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -635,7 +635,7 @@ static const yytype_uint8 yyr2[] =
        2,     3,     5,     3,     3,     1,     1,     1,     3,     1,
        1,     3,     1,     3,     3,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     1,     1,     1,     4,     9,
-       5,     3,     3,     1,     1,     3,     6
+       5,     3,     3,     1,     1,     0,     3,     6
 };
 
 
@@ -1630,19 +1630,25 @@ yyreduce:
     break;
 
   case 55:
-#line 128 "parser.y" /* yacc.c:1646  */
-    {(yyval.read_state) = new ASTread("int" , (yyvsp[-1].stringval));}
+#line 127 "parser.y" /* yacc.c:1646  */
+    {	(yyval.print_expr) = new std::vector<ASTprintexpr*> ; }
 #line 1636 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
 #line 129 "parser.y" /* yacc.c:1646  */
-    {(yyval.read_state) = new ASTread("array" , (yyvsp[-4].stringval) , (yyvsp[-2].single_expr));}
+    {(yyval.read_state) = new ASTread("int" , (yyvsp[-1].stringval));}
 #line 1642 "parser.tab.c" /* yacc.c:1646  */
     break;
 
+  case 57:
+#line 130 "parser.y" /* yacc.c:1646  */
+    {(yyval.read_state) = new ASTread("array" , (yyvsp[-4].stringval) , (yyvsp[-2].single_expr));}
+#line 1648 "parser.tab.c" /* yacc.c:1646  */
+    break;
 
-#line 1646 "parser.tab.c" /* yacc.c:1646  */
+
+#line 1652 "parser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1870,7 +1876,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 130 "parser.y" /* yacc.c:1906  */
+#line 131 "parser.y" /* yacc.c:1906  */
 
 
 void yyerror (char const *s)
