@@ -114,15 +114,41 @@ Value * Codegen::visit (class ASTprint * node)
 {}
 Value * Codegen::visit (class ASTforloop * node)
 {
-	// ASTassignment * init = 
+	Value * var = myModule->getGlobalVariable(node->getId());
+	Value * val = (node->getstart())->accept(this);
+	Value * v =  Builder.CreateStore(val,var);
+
+	Value * rhs = (node->getend())->accept(this);
+	Value * cond = Builder.CreateICmpULE(var,rhs,"lecomparetmp");
+	
+	BasicBlock * ForBB = createBB(mainFunc,"for");
+	BasicBlock * ForcontBB = createBB(mainFunc,"forcont");
+	BasicBlock * ContBB = createBB(mainFunc,"forcontinue");
+	Builder.SetInsertPoint(ForBB);
+	Builder.CreateCondBr(cond,	ForcontBB ,	ContBB);
+	Builder.SetInsertPoint(ForcontBB);
+	Value* ForVal = ConstantInt::get(myContext, APInt(32,1));
+	int n = (*node->getsubstate()).size();
+	for (int j=n-1;j>=0;j--)
+	{
+		ForVal = (*node->getsubstate())[j].first->accept(this);
+	}
+	Value * ans = node->getstep()->accept(this);
+	val = Builder.CreateAdd(var,ans,"addtmp");
+	v =  Builder.CreateStore(val,var);
+	Builder.CreateBr(ForBB);
+	Builder.SetInsertPoint(ContBB);
+	return ans;
 }
 Value * Codegen::visit (class ASTwhileloop * node)
 {
 	Value * cond = (node->getexpr())->accept(this);
 	BasicBlock * WhileBB = createBB(mainFunc,"while");
-	BasicBlock * ContBB = createBB(mainFunc,"continue");
+	BasicBlock * WhilecontBB = createBB(mainFunc,"whilecont");
+	BasicBlock * ContBB = createBB(mainFunc,"whilecontinue");
 	Builder.SetInsertPoint(WhileBB);
-	Builder.CreateCondBr(cond,	WhileBB ,	ContBB);
+	Builder.CreateCondBr(cond,	WhilecontBB ,	ContBB);
+	Builder.SetInsertPoint(WhilecontBB);
 	Value* WhileVal = ConstantInt::get(myContext, APInt(32,1));
 	int n = (*node->getsubstate()).size();
 	for (int j=n-1;j>=0;j--)
@@ -142,7 +168,7 @@ Value * Codegen::visit (class ASTif * node)
 {
 	Value * cond = (node->getexpr())->accept(this);
 	BasicBlock * IFBB = createBB(mainFunc,"if");
-	BasicBlock * ContBB = createBB(mainFunc,"continue");
+	BasicBlock * ContBB = createBB(mainFunc,"ifcontinue");
 	Builder.CreateCondBr(cond,	IFBB , ContBB);
 	Builder.SetInsertPoint(IFBB);
 	Value* IFVal = ConstantInt::get(myContext, APInt(32,1));
@@ -164,7 +190,7 @@ Value * Codegen::visit (class ASTifelse * node)
 	Value * cond = (node->getexpr())->accept(this);
 	BasicBlock * IFBB = createBB(mainFunc,"if");
 	BasicBlock * ElseBB = createBB(mainFunc,"else");
-	BasicBlock * ContBB = createBB(mainFunc,"continue");
+	BasicBlock * ContBB = createBB(mainFunc,"ifelsecontinue");
 	Builder.CreateCondBr(cond,	IFBB ,	ElseBB);
 	Builder.SetInsertPoint(IFBB);
 	Value* IFVal = ConstantInt::get(myContext, APInt(32,1));
