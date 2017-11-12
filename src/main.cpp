@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
     do {
         yyparse();
     } while (!feof(yyin));
-    Visitors * startvisitor = new Visitors();
+    // Interpreter * startvisitor = new Interpreter();
+    Codegen * startvisitor = new Codegen();
     programhead->accept(startvisitor);
 }

@@ -9,7 +9,7 @@ std::map<string, vector<int> >::iterator ia1;
 std::map<string, int>::iterator ii1;
 std::vector<string>errors;
 string label = "";
-void * Visitors::visit (class ASTProgram * node)
+void * Interpreter::visit (class ASTProgram * node)
 {
 	vector<ASTDeclBlock*> *vardecls = node->getdeclBlock();
 	if(vardecls)
@@ -57,7 +57,7 @@ void * Visitors::visit (class ASTProgram * node)
 	}
 }
 
-void * Visitors::visit (class ASTDeclBlock * node)
+void * Interpreter::visit (class ASTDeclBlock * node)
 {
 	if(node->getIdList())
 	{
@@ -68,7 +68,7 @@ void * Visitors::visit (class ASTDeclBlock * node)
 	}
 }
 
-void * Visitors::visit (class ASTidvariable * node)
+void * Interpreter::visit (class ASTidvariable * node)
 {
 	string id = node->getId();
 	string type = node->getTyped();
@@ -87,7 +87,7 @@ void * Visitors::visit (class ASTidvariable * node)
 	}
 }
 
-int Visitors::visit (class ASTprint * node)
+int Interpreter::visit (class ASTprint * node)
 {
 	if(node->getsubstate())
 	{
@@ -99,7 +99,7 @@ int Visitors::visit (class ASTprint * node)
 	return 0;
 }
 
-int Visitors::visit (class ASTprintln * node)
+int Interpreter::visit (class ASTprintln * node)
 {
 	if((node->getsubstate())->size()>0)
 	{
@@ -112,10 +112,10 @@ int Visitors::visit (class ASTprintln * node)
 	{
 		cout<<"\n";
 	}
-	return 0;
+	
 }
 
-void * Visitors::visit (class ASTprintexpr * node , int fl)
+void * Interpreter::visit (class ASTprintexpr * node , int fl)
 {
 	if(node->getstring()=="")
 	{
@@ -135,7 +135,7 @@ void * Visitors::visit (class ASTprintexpr * node , int fl)
 	}
 }
 
-int Visitors::visit (class ASTforloop * node)
+int Interpreter::visit (class ASTforloop * node)
 {
 	int step = (node->getstep())->accept(this);
 	int s = (node->getstart())->accept(this);
@@ -173,7 +173,7 @@ int Visitors::visit (class ASTforloop * node)
 	}
 	return 0;
 }
-int Visitors::visit (class ASTwhileloop * node)
+int Interpreter::visit (class ASTwhileloop * node)
 {
 	map<string , int>ltable;
 	int n = (*node->getsubstate()).size();
@@ -204,7 +204,7 @@ int Visitors::visit (class ASTwhileloop * node)
 	}
 	return 0;
 }
-int Visitors::visit (class ASTread * node)
+int Interpreter::visit (class ASTread * node)
 {
 	int val;cin>>val;
 	if(node->getTyped()=="int")
@@ -218,7 +218,7 @@ int Visitors::visit (class ASTread * node)
 	}
 	return 0 ;
 }
-int Visitors::visit (class ASTassignment * node)
+int Interpreter::visit (class ASTassignment * node)
 {
 	if(node->getTyped()=="id")
 	{
@@ -233,7 +233,7 @@ int Visitors::visit (class ASTassignment * node)
 	}
 	return 0;
 }
-int Visitors::visit (class ASTgoto * node)
+int Interpreter::visit (class ASTgoto * node)
 {
 	if(node->getexpr()==NULL)
 	{
@@ -251,7 +251,7 @@ int Visitors::visit (class ASTgoto * node)
 	}
 	return 0 ;
 }
-int Visitors::visit (class ASTifelse * node)
+int Interpreter::visit (class ASTifelse * node)
 {
 	if((node->getexpr())->accept(this) == true)
 	{
@@ -309,7 +309,7 @@ int Visitors::visit (class ASTifelse * node)
 	}	
 	return 0;
 }
-int Visitors::visit (class ASTif * node)
+int Interpreter::visit (class ASTif * node)
 {
 	if((node->getexpr())->accept(this) == true)
 	{
@@ -341,7 +341,7 @@ int Visitors::visit (class ASTif * node)
 	return 0;
 }
 
-bool Visitors::visit (class ASTexpression * node)
+bool Interpreter::visit (class ASTexpression * node)
 {
 	bool ans = 0;
 	if(node->getterm())
@@ -357,7 +357,7 @@ bool Visitors::visit (class ASTexpression * node)
 	return ans;
 }
 
-bool Visitors::visit (class ASTtermexpr * node)
+bool Interpreter::visit (class ASTtermexpr * node)
 {
 	bool ans = 1;
 	if(node->getfirstexpr())
@@ -373,7 +373,7 @@ bool Visitors::visit (class ASTtermexpr * node)
 	return ans;
 }
 
-bool Visitors::visit (class ASTfirstexpr * node)
+bool Interpreter::visit (class ASTfirstexpr * node)
 {
 	int lhs = (node->getleft())->accept(this);
 	int rhs = (node->getright())->accept(this);
@@ -433,7 +433,7 @@ bool Visitors::visit (class ASTfirstexpr * node)
 	}
 }
 
-int Visitors::visit (class ASTvalue * node)
+int Interpreter::visit (class ASTvalue * node)
 {
 	int val;
 	if(node->getTyped()=="int")
@@ -448,7 +448,7 @@ int Visitors::visit (class ASTvalue * node)
 	return val;
 }
 
-int Visitors::visit (class ASTbinaryexpr * node)
+int Interpreter::visit (class ASTbinaryexpr * node)
 {
 	int lhs = (node->getleft())->accept(this);
 	int rhs = (node->getright())->accept(this);
