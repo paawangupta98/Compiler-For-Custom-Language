@@ -19,12 +19,18 @@ BasicBlock	*createBB(Function	*fooFunc,string	Name)	{
 	return	BasicBlock::Create(myContext,Name,fooFunc);
 }
 Function * mainFunc = createFunc(Builder,"main");
-Constant * printFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), PointerType::get(Type::getInt8Ty(myContext), 0), true) );
-
+Constant * printFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), true) );
+// Constant * printintFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), PointerType::get(Type::getInt32Ty(myContext), 0), true) );
+std::vector<Value*> v_space;
+std::vector<Value*> v_new;
 Value * Codegen::visit (class ASTProgram * node)
 {
 	BasicBlock	*entry	=	createBB(mainFunc,	"entry");
 	Builder.SetInsertPoint(entry);
+	Value * newline = Builder.CreateGlobalStringPtr("\n");
+	Value * spacechar = Builder.CreateGlobalStringPtr(" ");
+	v_space.push_back(spacechar);
+	v_new.push_back(newline);
 	Value* v = ConstantInt::get(myContext, APInt(32,1));
 	vector<ASTDeclBlock*> *vardecls = node->getdeclBlock();
 	if(vardecls)
@@ -123,17 +129,13 @@ Value * Codegen::visit (class ASTprint * node)
 		for (auto it = (*node->getsubstate()).rbegin(); it != (*node->getsubstate()).rend(); ++it)
 		{
 			newV = (*it)->accept(this , 0);
-			argsV.push_back(newV[0]);
-			argsV.push_back(newV[1]);
 		}
 	}
-	v = Builder.CreateCall(printFunc, argsV, "printfCall");
 	return v;
 }
 
 Value * Codegen::visit (class ASTprintln * node)
 {
-	std::vector<Value *> argsV;
 	std::vector<Value *> newV;
 	Value * v = ConstantInt::get(myContext, APInt(32,1));
 	if(node->getsubstate())
@@ -141,47 +143,44 @@ Value * Codegen::visit (class ASTprintln * node)
 		for (auto it = (*node->getsubstate()).rbegin(); it != (*node->getsubstate()).rend(); ++it)
 		{
 			newV = (*it)->accept(this , 1);
-			argsV.push_back(newV[0]);
-			argsV.push_back(newV[1]);
 		}
 	}
-	v = Builder.CreateCall(printFunc, argsV, "printfCall");
+	// v = Builder.CreateCall(printFunc, argsV, "printfCall");
 	return v;
 }
 std::vector<Value *> Codegen::visit (class ASTprintexpr * node , int fl)
 {
 	std::vector<Value *> args;
 	Value * v = ConstantInt::get(myContext, APInt(32,1));
-	Value * newline = Builder.CreateGlobalStringPtr("\n");
-	Value * spacechar = Builder.CreateGlobalStringPtr(" ");
+	
 	if(node->getstring()=="")
 	{
 		v = (node->getval())->accept(this);
 		args.push_back(v);
+		v = Builder.CreateCall(printFunc, args, "printfCall");
+		args.clear();
 		if(fl==0)
 		{
-			args.push_back(spacechar);
-			// cout<<val<<" ";
+			v = Builder.CreateCall(printFunc, v_space, "printfCall");
 		}
 		else
 		{
-			args.push_back(newline);
-			// cout<<val<<"\n";
+			v = Builder.CreateCall(printFunc, v_new, "printfCall");
 		}
 	}
 	else if(node->getval()==NULL)
 	{
 		v = Builder.CreateGlobalStringPtr(node->getstring());
 		args.push_back(v);
+		v = Builder.CreateCall(printFunc, args, "printfCall");
+		args.clear();
 		if(fl==0)
 		{
-			args.push_back(spacechar);
-			// cout<<val<<" ";
+			v = Builder.CreateCall(printFunc, v_space, "printfCall");
 		}
 		else
 		{
-			args.push_back(newline);
-			// cout<<val<<"\n";
+			v = Builder.CreateCall(printFunc, v_new, "printfCall");
 		}
 	}
 	return args;
@@ -197,9 +196,9 @@ Value * Codegen::visit (class ASTforloop * node)
 	BasicBlock * ForcontBB = createBB(mainFunc,"forcont");
 	BasicBlock * ContBB = createBB(mainFunc,"forcontinue");
 	Value * v =  Builder.CreateStore(val,var);
-	Value * var1 = Builder.CreateLoad(var);
 	Builder.CreateBr(ForBB);
 	Builder.SetInsertPoint(ForBB);
+	Value * var1 = Builder.CreateLoad(var);
 	Value * cond = Builder.CreateICmpULE(var1,rhs,"lecomparetmp");
 	Builder.CreateCondBr(cond,	ForcontBB ,	ContBB);
 	Builder.SetInsertPoint(ForcontBB);
@@ -218,11 +217,12 @@ Value * Codegen::visit (class ASTforloop * node)
 }
 Value * Codegen::visit (class ASTwhileloop * node)
 {
-	Value * cond = (node->getexpr())->accept(this);
 	BasicBlock * WhileBB = createBB(mainFunc,"while");
 	BasicBlock * WhilecontBB = createBB(mainFunc,"whilecont");
 	BasicBlock * ContBB = createBB(mainFunc,"whilecontinue");
+	Builder.CreateBr(WhileBB);
 	Builder.SetInsertPoint(WhileBB);
+	Value * cond = (node->getexpr())->accept(this);
 	Builder.CreateCondBr(cond,	WhilecontBB ,	ContBB);
 	Builder.SetInsertPoint(WhilecontBB);
 	Value* WhileVal = ConstantInt::get(myContext, APInt(32,1));
