@@ -34,18 +34,6 @@ Value * Codegen::visit (class ASTProgram * node)
 	}
 	
 	int n = (*node->getcodeBlock()).size();
-	// if(node->getcodeBlock())
-	// {
-	// 	for (int i=n-1;i>=0;i--)
-	// 	{
-	// 		if((*node->getcodeBlock())[i].second=="")
-	// 		{;}
-	// 		else
-	// 		{
-	// 			// ltable.insert(make_pair(((*node->getcodeBlock())[i].second) , i ));
-	// 		}
-	// 	}
-	// }
 	if(node->getcodeBlock())
 	{
 		for (int i=n-1;i>=0;i--)
@@ -53,8 +41,15 @@ Value * Codegen::visit (class ASTProgram * node)
 			v = (*node->getcodeBlock())[i].first->accept(this);
 		}
 	}
+	v = ConstantInt::get(myContext, APInt(32,1));
+	Builder.CreateRet(v);
 	verifyFunction(*mainFunc);
 	cout<<"Generating IR CODE\n";
+	// std::error_code EC;
+	// llvm::raw_fd_ostream OS("module.bcc", EC, llvm::sys::fs::F_None);
+	// WriteBitcodeToFile(myModule, OS);
+	// OS.flush();
+
     myModule->dump();
 	return v;
 }
@@ -104,6 +99,7 @@ Value * Codegen::visit (class ASTassignment * node)
 	    ar_index.push_back(index);
 	    var = Builder.CreateGEP(var, ar_index, node->getId()+"_Index");
 	}
+	var = Builder.CreateLoad(var);
 	Value * val = (node->getexpr())->accept(this);
 	v =  Builder.CreateStore(val,var);
 	return v;
@@ -115,6 +111,7 @@ Value * Codegen::visit (class ASTprint * node)
 Value * Codegen::visit (class ASTforloop * node)
 {
 	Value * var = myModule->getGlobalVariable(node->getId());
+	var = Builder.CreateLoad(var);
 	Value * val = (node->getstart())->accept(this);
 	Value * v =  Builder.CreateStore(val,var);
 
@@ -123,6 +120,7 @@ Value * Codegen::visit (class ASTforloop * node)
 	
 	BasicBlock * ForBB = createBB(mainFunc,"for");
 	BasicBlock * ForcontBB = createBB(mainFunc,"forcont");
+	Value *NextVal  = Builder.CreateAdd(var, var,  "nextval");
 	BasicBlock * ContBB = createBB(mainFunc,"forcontinue");
 	Builder.SetInsertPoint(ForBB);
 	Builder.CreateCondBr(cond,	ForcontBB ,	ContBB);
@@ -138,6 +136,7 @@ Value * Codegen::visit (class ASTforloop * node)
 	v =  Builder.CreateStore(val,var);
 	Builder.CreateBr(ForBB);
 	Builder.SetInsertPoint(ContBB);
+	ans = ConstantInt::get(myContext, APInt(32,1));
 	return ans;
 }
 Value * Codegen::visit (class ASTwhileloop * node)
@@ -157,7 +156,7 @@ Value * Codegen::visit (class ASTwhileloop * node)
 	}
 	Builder.CreateBr(WhileBB);
 	Builder.SetInsertPoint(ContBB);
-	Value* ans = ConstantInt::get(myContext, APInt(1,1));
+	Value* ans = ConstantInt::get(myContext, APInt(32,1));
 	return ans;
 }
 Value * Codegen::visit (class ASTgoto * node)
@@ -182,7 +181,7 @@ Value * Codegen::visit (class ASTif * node)
 	Builder.SetInsertPoint(ContBB);
 	// PHINode	*Phi = Builder.CreatePHI(Type::getInt32Ty(getGlobalContext()),PhiBBSize,"iftmp");
 	// Phi->addIncoming(IFVal,IFBB);
-	Value* ans = ConstantInt::get(myContext, APInt(1,1));
+	Value* ans = ConstantInt::get(myContext, APInt(32,1));
 	return ans;
 }
 Value * Codegen::visit (class ASTifelse * node)
@@ -210,10 +209,10 @@ Value * Codegen::visit (class ASTifelse * node)
 	Builder.CreateBr(ContBB);
 	// unsigned PhiBBSize = 2;
 	Builder.SetInsertPoint(ContBB);
-	// PHINode	*Phi = Builder.CreatePHI(Type::getInt32Ty(getGlobalContext()),PhiBBSize,"iftmp");
+	// PHINode	*Phi = Builder.CreatePHI(Type::getInt32Ty(getGlobalContext()),PhiBBSize,"ifelsetmp");
 	// Phi->addIncoming(IFVal,IFBB);
 	// Phi->addIncoming(ElseVal,ElseBB);
-	Value* ans = ConstantInt::get(myContext, APInt(1,1));
+	Value* ans = ConstantInt::get(myContext, APInt(32,1));
 	return ans;
 }
 
@@ -294,7 +293,10 @@ Value * Codegen::visit (class ASTvalue * node)
 	Value* var = ConstantInt::get(myContext, APInt(32,node->getval()));
 	// cout<<"haha2\n";
 	if(typed=="id")
+	{
 		var = myModule->getGlobalVariable(node->getId());
+		var = Builder.CreateLoad(var);
+	}
 	else if(typed=="array")
 	{
 		Value * index = (node->getexpr())->accept(this);

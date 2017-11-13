@@ -1,0 +1,54 @@
+
+@x0 = external global i32
+@yar = external global i32
+@zarray = global [102 x i32] zeroinitializer
+@tarrya = external global i32
+@sum = external global i32
+
+define i32 @main() {
+entry:
+  store i32 6, i32* @x0
+  store i32 0, i32* @sum
+  store i32* add (i32 sub (i32* @x0, i32 624), i32 7), i32* @yar
+  br i1 icmp ugt (i32* @x0, i32 7), label %if, label %else
+
+if:                                               ; preds = %entry
+  store i32* add (i32* @x0, i32 9), i32* @yar
+  br label %ifelsecontinue
+
+else:                                             ; preds = %entry
+  store i32* add (i32* @x0, i32 8), i32* @yar
+  br label %ifelsecontinue
+
+ifelsecontinue:                                   ; preds = %else, %if
+  store i32 1, i32** @x0
+
+for:                                              ; preds = %forcont
+  br i1 icmp ule (i32** @x0, i32 1), label %forcont, label %forcontinue
+
+forcont:                                          ; preds = %for
+  store i32** add (i32** @sum, i32 1), i32** @sum
+  store i32** add (i32** @x0, i32 10), i32** @x0
+  br label %for
+
+forcontinue:                                      ; preds = %for
+
+while:                                            ; preds = %whilecont
+  br i1 icmp ule (i32** @x0, i32 10), label %whilecont, label %whilecontinue
+
+whilecont:                                        ; preds = %while
+  store i32** add (i32** @sum, i32** @yar), i32** @sum
+  store i32** add (i32** @x0, i32 1), i32** @x0
+  br label %while
+
+whilecontinue:                                    ; preds = %while
+  store i32** @sum, i32** @x0
+  br i1 icmp uge (i32** @x0, i32 10), label %if1, label %ifcontinue
+
+if1:                                              ; preds = %whilecontinue
+  store i32** add (i32** @x0, i32 9), i32** @yar
+  br label %ifcontinue
+
+ifcontinue:                                       ; preds = %if1, %whilecontinue
+  store i32 5, i32** @x0
+}
