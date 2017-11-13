@@ -20,8 +20,7 @@ BasicBlock	*createBB(Function	*fooFunc,string	Name)	{
 }
 Function * mainFunc = createFunc(Builder,"main");
 Constant * printFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), true) );
-// Constant * printintFunc = myModule->getOrInsertFunction("printfint",FunctionType::get(IntegerType::getInt32Ty(myContext), true) );
-// Constant * printintFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), PointerType::get(Type::getInt32Ty(myContext), 0), true) );
+Constant * readFunc = myModule->getOrInsertFunction("scanf",FunctionType::get(IntegerType::getInt32Ty(myContext), true) );
 std::vector<Value*> v_space;
 std::vector<Value*> v_new;
 std::vector<Value*> v_int;
@@ -248,7 +247,13 @@ Value * Codegen::visit (class ASTwhileloop * node)
 Value * Codegen::visit (class ASTgoto * node)
 {}
 Value * Codegen::visit (class ASTread * node)
-{}
+{
+	Value * var = myModule->getGlobalVariable(node->getId());
+	v_int.push_back(var);
+	Value *v = Builder.CreateCall(readFunc, v_int, "readCall");
+	v_int.pop_back();
+	return v;
+}
 Value * Codegen::visit (class ASTif * node)
 {
 	Value * cond = (node->getexpr())->accept(this);

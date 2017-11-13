@@ -9,7 +9,10 @@
 @zarray = common global [102 x i32] zeroinitializer, align 4
 @tarrya = common global i32 0, align 4
 @i = common global i32 0, align 4
-@4 = private unnamed_addr constant [5 x i8] c"haha\00"
+@t = common global i32 0, align 4
+@sum = common global i32 0, align 4
+@n = common global i32 0, align 4
+@4 = private unnamed_addr constant [10 x i8] c"New Sum =\00"
 @5 = private unnamed_addr constant [6 x i8] c"haha1\00"
 @6 = private unnamed_addr constant [3 x i8] c"qw\00"
 @7 = private unnamed_addr constant [3 x i8] c"ty\00"
@@ -23,30 +26,34 @@ entry:
   %addtmp = add i32 7, %subtmp
   store i32 %addtmp, i32* @yar
   store i32 5, i32* @x0
+  %readCall = call i32 (...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0), i32* @n)
+  %1 = load i32, i32* @n
   store i32 1, i32* @i
   br label %for
 
 for:                                              ; preds = %forcont, %entry
-  %1 = load i32, i32* @i
-  %lecomparetmp = icmp ule i32 %1, 10
+  %2 = load i32, i32* @i
+  %lecomparetmp = icmp ule i32 %2, %1
   br i1 %lecomparetmp, label %forcont, label %forcontinue
 
 forcont:                                          ; preds = %for
-  %printfCall = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @4, i32 0, i32 0))
-  %printfCall1 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %2 = load i32, i32* @x0
-  %printfCall2 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0), i32 %2)
-  %printfCall3 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %3 = load i32, i32* @yar
-  %printfCall4 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0), i32 %3)
-  %printfCall5 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %addtmp6 = add i32 %1, 1
-  store i32 %addtmp6, i32* @i
+  %readCall1 = call i32 (...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0), i32* @t)
+  %3 = load i32, i32* @sum
+  %4 = load i32, i32* @t
+  %addtmp2 = add i32 %3, %4
+  store i32 %addtmp2, i32* @sum
+  %addtmp3 = add i32 %2, 1
+  store i32 %addtmp3, i32* @i
   br label %for
 
 forcontinue:                                      ; preds = %for
-  %4 = load i32, i32* @x0
-  %equalcomparetmp = icmp eq i32 %4, 5
+  %printfCall = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([10 x i8], [10 x i8]* @4, i32 0, i32 0))
+  %printfCall4 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  %5 = load i32, i32* @sum
+  %printfCall5 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0), i32 %5)
+  %printfCall6 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  %6 = load i32, i32* @x0
+  %equalcomparetmp = icmp eq i32 %6, 5
   %AND = and i1 true, %equalcomparetmp
   %OR = or i1 false, %AND
   br i1 %OR, label %if, label %ifcontinue
@@ -57,8 +64,8 @@ if:                                               ; preds = %forcontinue
   br label %ifcontinue
 
 ifcontinue:                                       ; preds = %if, %forcontinue
-  %5 = load i32, i32* @yar
-  %gtcomparetmp = icmp ugt i32 %5, 10
+  %7 = load i32, i32* @yar
+  %gtcomparetmp = icmp ugt i32 %7, 10
   %AND9 = and i1 true, %gtcomparetmp
   %OR10 = or i1 false, %AND9
   br i1 %OR10, label %if11, label %else
@@ -77,15 +84,15 @@ ifelsecontinue:                                   ; preds = %else, %if11
   br label %while
 
 while:                                            ; preds = %whilecont, %ifelsecontinue
-  %6 = load i32, i32* @x0
-  %ltcomparetmp = icmp ult i32 %6, 10
+  %8 = load i32, i32* @x0
+  %ltcomparetmp = icmp ult i32 %8, 10
   %AND16 = and i1 true, %ltcomparetmp
   %OR17 = or i1 false, %AND16
   br i1 %OR17, label %whilecont, label %whilecontinue
 
 whilecont:                                        ; preds = %while
-  %7 = load i32, i32* @x0
-  %addtmp18 = add i32 %7, 2
+  %9 = load i32, i32* @x0
+  %addtmp18 = add i32 %9, 2
   store i32 %addtmp18, i32* @x0
   %printfCall19 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([5 x i8], [5 x i8]* @8, i32 0, i32 0))
   %printfCall20 = call i32 (...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0), i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
@@ -96,3 +103,5 @@ whilecontinue:                                    ; preds = %while
 }
 
 declare i32 @printf(...)
+
+declare i32 @scanf(...)
