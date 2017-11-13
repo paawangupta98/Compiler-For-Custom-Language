@@ -117,7 +117,6 @@ Value * Codegen::visit (class ASTassignment * node)
 	if(typed=="array")
 	{
 		Value * index = (node->getval())->accept(this);
-		index = Builder.CreateLoad(index);
 	    vector<Value*> ar_index;
 	    ar_index.push_back(Builder.getInt32(0));
 	    ar_index.push_back(index);
@@ -248,7 +247,18 @@ Value * Codegen::visit (class ASTgoto * node)
 {}
 Value * Codegen::visit (class ASTread * node)
 {
-	Value * var = myModule->getGlobalVariable(node->getId());
+	Value * var;
+	if(node->getTyped()=="int")
+		var = myModule->getGlobalVariable(node->getId());
+	else
+	{
+		var = myModule->getGlobalVariable(node->getId());
+		Value * index = (node->getval())->accept(this);
+	    vector<Value*> ar_index;
+	    ar_index.push_back(Builder.getInt32(0));
+	    ar_index.push_back(index);
+	    var = Builder.CreateGEP(var, ar_index, node->getId()+"_Index");
+	}
 	v_int.push_back(var);
 	Value *v = Builder.CreateCall(readFunc, v_int, "readCall");
 	v_int.pop_back();
@@ -390,12 +400,13 @@ Value * Codegen::visit (class ASTvalue * node)
 	}
 	else if(typed=="array")
 	{
+		var = myModule->getGlobalVariable(node->getId());
 		Value * index = (node->getexpr())->accept(this);
-		index = Builder.CreateLoad(index);
 	    vector<Value*> ar_index;
 	    ar_index.push_back(Builder.getInt32(0));
 	    ar_index.push_back(index);
 	    var = Builder.CreateGEP(var, ar_index, node->getId()+"_Index");
+	    var = Builder.CreateLoad(var);
 	}
 	return var;
 }
