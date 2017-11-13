@@ -19,6 +19,8 @@ BasicBlock	*createBB(Function	*fooFunc,string	Name)	{
 	return	BasicBlock::Create(myContext,Name,fooFunc);
 }
 Function * mainFunc = createFunc(Builder,"main");
+Constant * printFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), PointerType::get(Type::getInt8Ty(myContext), 0), true) );
+
 Value * Codegen::visit (class ASTProgram * node)
 {
 	BasicBlock	*entry	=	createBB(mainFunc,	"entry");
@@ -44,13 +46,16 @@ Value * Codegen::visit (class ASTProgram * node)
 	v = ConstantInt::get(myContext, APInt(32,1));
 	Builder.CreateRet(v);
 	verifyFunction(*mainFunc);
-	cout<<"Generating IR CODE\n";
+	// cout<<"Generating IR CODE\n";
 	// std::error_code EC;
 	// llvm::raw_fd_ostream OS("module.bcc", EC, llvm::sys::fs::F_None);
 	// WriteBitcodeToFile(myModule, OS);
 	// OS.flush();
-
-    myModule->dump();
+	// fstream file ;
+	// file.open("haha.bcc" , ios::out|ios::in);
+	// file<<(myModule->dump());
+	// file.close();
+	myModule->dump();
 	return v;
 }
 Value * Codegen::visit (class ASTDeclBlock * node)
@@ -70,16 +75,21 @@ Value * Codegen::visit (class ASTidvariable * node)
 	Type * type = Type::getInt32Ty(myContext);
 	string id = node->getId();
 	string type1 = node->getTyped();
+	ConstantInt* const_int_val = ConstantInt::get(myModule->getContext(), APInt(32,0));
 	if(type1=="id")
 	{
-		PointerType* idptr = PointerType::get(type,0);
-		GlobalVariable* gv_id = new GlobalVariable(*myModule,idptr,false,GlobalValue::ExternalLinkage, 0, id);
+		myModule->getOrInsertGlobal(id,	Builder.getInt32Ty());
+		GlobalVariable	*gv_id	=	myModule->getNamedGlobal(id);
+		gv_id->setLinkage(GlobalValue::CommonLinkage);
+		gv_id->setInitializer(const_int_val);
+		gv_id->setAlignment(4);
 	}
 	else if(type1=="array")
 	{
 		ArrayType* arrType = ArrayType::get(type,node->getSize());
 		PointerType* arrayptr = PointerType::get(ArrayType::get(type,node->getSize()),0);
-		GlobalVariable* gv = new GlobalVariable(*myModule,arrType,false,GlobalValue::ExternalLinkage,0,id);
+		GlobalVariable* gv = new GlobalVariable(*myModule,arrType,false,GlobalValue::CommonLinkage,0,id);
+		gv->setAlignment(4);
 		gv->setInitializer(ConstantAggregateZero::get(arrType));
 	}
 	Value* v = ConstantInt::get(myContext, APInt(32,1));
@@ -99,30 +109,98 @@ Value * Codegen::visit (class ASTassignment * node)
 	    ar_index.push_back(index);
 	    var = Builder.CreateGEP(var, ar_index, node->getId()+"_Index");
 	}
-	var = Builder.CreateLoad(var);
 	Value * val = (node->getexpr())->accept(this);
 	v =  Builder.CreateStore(val,var);
 	return v;
 }
-Value * Codegen::visit (class ASTprintln * node)
-{}
 Value * Codegen::visit (class ASTprint * node)
-{}
+{
+	std::vector<Value *> argsV;
+	std::vector<Value *> newV;
+	Value * v = ConstantInt::get(myContext, APInt(32,1));
+	if(node->getsubstate())
+	{
+		for (auto it = (*node->getsubstate()).rbegin(); it != (*node->getsubstate()).rend(); ++it)
+		{
+			newV = (*it)->accept(this , 0);
+			argsV.push_back(newV[0]);
+			argsV.push_back(newV[1]);
+		}
+	}
+	v = Builder.CreateCall(printFunc, argsV, "printfCall");
+	return v;
+}
+
+Value * Codegen::visit (class ASTprintln * node)
+{
+	std::vector<Value *> argsV;
+	std::vector<Value *> newV;
+	Value * v = ConstantInt::get(myContext, APInt(32,1));
+	if(node->getsubstate())
+	{
+		for (auto it = (*node->getsubstate()).rbegin(); it != (*node->getsubstate()).rend(); ++it)
+		{
+			newV = (*it)->accept(this , 1);
+			argsV.push_back(newV[0]);
+			argsV.push_back(newV[1]);
+		}
+	}
+	v = Builder.CreateCall(printFunc, argsV, "printfCall");
+	return v;
+}
+std::vector<Value *> Codegen::visit (class ASTprintexpr * node , int fl)
+{
+	std::vector<Value *> args;
+	Value * v = ConstantInt::get(myContext, APInt(32,1));
+	Value * newline = Builder.CreateGlobalStringPtr("\n");
+	Value * spacechar = Builder.CreateGlobalStringPtr(" ");
+	if(node->getstring()=="")
+	{
+		v = (node->getval())->accept(this);
+		args.push_back(v);
+		if(fl==0)
+		{
+			args.push_back(spacechar);
+			// cout<<val<<" ";
+		}
+		else
+		{
+			args.push_back(newline);
+			// cout<<val<<"\n";
+		}
+	}
+	else if(node->getval()==NULL)
+	{
+		v = Builder.CreateGlobalStringPtr(node->getstring());
+		args.push_back(v);
+		if(fl==0)
+		{
+			args.push_back(spacechar);
+			// cout<<val<<" ";
+		}
+		else
+		{
+			args.push_back(newline);
+			// cout<<val<<"\n";
+		}
+	}
+	return args;
+}
+
 Value * Codegen::visit (class ASTforloop * node)
 {
 	Value * var = myModule->getGlobalVariable(node->getId());
-	var = Builder.CreateLoad(var);
 	Value * val = (node->getstart())->accept(this);
-	Value * v =  Builder.CreateStore(val,var);
-
 	Value * rhs = (node->getend())->accept(this);
-	Value * cond = Builder.CreateICmpULE(var,rhs,"lecomparetmp");
-	
+	Value * ans = node->getstep()->accept(this);
 	BasicBlock * ForBB = createBB(mainFunc,"for");
 	BasicBlock * ForcontBB = createBB(mainFunc,"forcont");
-	Value *NextVal  = Builder.CreateAdd(var, var,  "nextval");
 	BasicBlock * ContBB = createBB(mainFunc,"forcontinue");
+	Value * v =  Builder.CreateStore(val,var);
+	Value * var1 = Builder.CreateLoad(var);
+	Builder.CreateBr(ForBB);
 	Builder.SetInsertPoint(ForBB);
+	Value * cond = Builder.CreateICmpULE(var1,rhs,"lecomparetmp");
 	Builder.CreateCondBr(cond,	ForcontBB ,	ContBB);
 	Builder.SetInsertPoint(ForcontBB);
 	Value* ForVal = ConstantInt::get(myContext, APInt(32,1));
@@ -131,9 +209,8 @@ Value * Codegen::visit (class ASTforloop * node)
 	{
 		ForVal = (*node->getsubstate())[j].first->accept(this);
 	}
-	Value * ans = node->getstep()->accept(this);
-	val = Builder.CreateAdd(var,ans,"addtmp");
-	v =  Builder.CreateStore(val,var);
+	var1 = Builder.CreateAdd(var1,ans,"addtmp");
+	v =  Builder.CreateStore(var1,var);
 	Builder.CreateBr(ForBB);
 	Builder.SetInsertPoint(ContBB);
 	ans = ConstantInt::get(myContext, APInt(32,1));

@@ -308,7 +308,7 @@ class ASTprintexpr{
         void * accept(Interpreter *v , int x) {
             return v->visit(this , x);
         }
-        Value * accept(Codegen  * v,int x) {
+        vector<Value *> accept(Codegen  * v,int x) {
             return v->visit(this,x);
         }
 };

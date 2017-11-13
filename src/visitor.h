@@ -87,7 +87,7 @@ class Codegen {
 	Value * visit(class ASTforloop * );
 	Value * visit(class ASTwhileloop * );
 	Value * visit(class ASTread * );
-	Value * visit(class ASTprintexpr * ,int fl);
+	vector<Value *> visit(class ASTprintexpr * ,int fl);
 	Value * visit(class ASTprint * );
 	Value * visit(class ASTprintln * );
 	Value * visit(class ASTassignment * );

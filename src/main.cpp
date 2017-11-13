@@ -6,7 +6,6 @@ ASTProgram * programhead = NULL;
 extern "C" FILE *yyin;
 extern "C" int yyparse();
 extern "C" int yylex();
-
 int main(int argc, char** argv) {
     FILE *filename = fopen(argv[1], "r");
     if (argc == 1 ) {
@@ -25,4 +24,5 @@ int main(int argc, char** argv) {
     // Interpreter * startvisitor = new Interpreter();
     Codegen * startvisitor = new Codegen();
     programhead->accept(startvisitor);
+    // myModule->dump();
 }
