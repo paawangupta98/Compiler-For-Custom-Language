@@ -20,17 +20,26 @@ BasicBlock	*createBB(Function	*fooFunc,string	Name)	{
 }
 Function * mainFunc = createFunc(Builder,"main");
 Constant * printFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), true) );
+// Constant * printintFunc = myModule->getOrInsertFunction("printfint",FunctionType::get(IntegerType::getInt32Ty(myContext), true) );
 // Constant * printintFunc = myModule->getOrInsertFunction("printf",FunctionType::get(IntegerType::getInt32Ty(myContext), PointerType::get(Type::getInt32Ty(myContext), 0), true) );
 std::vector<Value*> v_space;
 std::vector<Value*> v_new;
+std::vector<Value*> v_int;
+std::vector<Value*> v_string;
 Value * Codegen::visit (class ASTProgram * node)
 {
 	BasicBlock	*entry	=	createBB(mainFunc,	"entry");
 	Builder.SetInsertPoint(entry);
 	Value * newline = Builder.CreateGlobalStringPtr("\n");
 	Value * spacechar = Builder.CreateGlobalStringPtr(" ");
+	Value * intprint = Builder.CreateGlobalStringPtr("%d");
+	Value * strprint = Builder.CreateGlobalStringPtr("%s");
+	v_space.push_back(strprint);
 	v_space.push_back(spacechar);
+	v_new.push_back(strprint);
 	v_new.push_back(newline);
+	v_int.push_back(intprint);
+	v_string.push_back(strprint);
 	Value* v = ConstantInt::get(myContext, APInt(32,1));
 	vector<ASTDeclBlock*> *vardecls = node->getdeclBlock();
 	if(vardecls)
@@ -156,9 +165,9 @@ std::vector<Value *> Codegen::visit (class ASTprintexpr * node , int fl)
 	if(node->getstring()=="")
 	{
 		v = (node->getval())->accept(this);
-		args.push_back(v);
-		v = Builder.CreateCall(printFunc, args, "printfCall");
-		args.clear();
+		v_int.push_back(v);
+		v = Builder.CreateCall(printFunc, v_int, "printfCall");
+		v_int.pop_back();
 		if(fl==0)
 		{
 			v = Builder.CreateCall(printFunc, v_space, "printfCall");
@@ -171,9 +180,9 @@ std::vector<Value *> Codegen::visit (class ASTprintexpr * node , int fl)
 	else if(node->getval()==NULL)
 	{
 		v = Builder.CreateGlobalStringPtr(node->getstring());
-		args.push_back(v);
-		v = Builder.CreateCall(printFunc, args, "printfCall");
-		args.clear();
+		v_string.push_back(v);
+		v = Builder.CreateCall(printFunc, v_string, "printfCall");
+		v_string.pop_back();
 		if(fl==0)
 		{
 			v = Builder.CreateCall(printFunc, v_space, "printfCall");
