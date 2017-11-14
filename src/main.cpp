@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
     do {
         yyparse();
     } while (!feof(yyin));
-    // Interpreter * startvisitor = new Interpreter();
-    Codegen * startvisitor = new Codegen();
+    Interpreter * startvisitor = new Interpreter();
+    // Codegen * startvisitor = new Codegen();
     programhead->accept(startvisitor);
     // myModule->dump();
 }

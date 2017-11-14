@@ -10,6 +10,7 @@ std::map<string, vector<int> >::iterator ia11;
 std::map<string, int>::iterator ii11;
 std::vector<string>errors1;
 string label1 = "";
+std::map<string , BasicBlock *> lables;
 Function * createFunc(IRBuilder<>&Builder,	string	Name)	{
 	FunctionType *funcType = FunctionType::get(Builder.getInt32Ty(),false);
 	Function *fooFunc = Function::Create(funcType,Function::ExternalLinkage,Name,myModule);
@@ -54,6 +55,25 @@ Value * Codegen::visit (class ASTProgram * node)
 	{
 		for (int i=n-1;i>=0;i--)
 		{
+			if((*node->getcodeBlock())[i].second=="")
+			{;}
+			else
+			{
+				lables.insert(make_pair((*node->getcodeBlock())[i].second , createBB(mainFunc , (*node->getcodeBlock())[i].second)));
+			}
+		}
+	}
+	if(node->getcodeBlock())
+	{
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getcodeBlock())[i].second=="")
+			{;}
+			else
+			{
+				Builder.CreateBr(lables[(*node->getcodeBlock())[i].second]);
+				Builder.SetInsertPoint(lables[(*node->getcodeBlock())[i].second]);
+			}
 			v = (*node->getcodeBlock())[i].first->accept(this);
 		}
 	}
@@ -211,9 +231,31 @@ Value * Codegen::visit (class ASTforloop * node)
 	Builder.SetInsertPoint(ForcontBB);
 	Value* ForVal = ConstantInt::get(myContext, APInt(32,1));
 	int n = (*node->getsubstate()).size();
-	for (int j=n-1;j>=0;j--)
+	if(node->getsubstate())
 	{
-		ForVal = (*node->getsubstate())[j].first->accept(this);
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate())[i].second=="")
+			{;}
+			else
+			{
+				lables.insert(make_pair((*node->getsubstate())[i].second , createBB(mainFunc , (*node->getsubstate())[i].second)));
+			}
+		}
+	}
+	if(node->getsubstate())
+	{
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate())[i].second=="")
+			{;}
+			else
+			{
+				Builder.CreateBr(lables[(*node->getsubstate())[i].second]);
+				Builder.SetInsertPoint(lables[(*node->getsubstate())[i].second]);
+			}
+			ForVal = (*node->getsubstate())[i].first->accept(this);
+		}
 	}
 	var1 = Builder.CreateAdd(var1,ans,"addtmp");
 	v =  Builder.CreateStore(var1,var);
@@ -234,9 +276,31 @@ Value * Codegen::visit (class ASTwhileloop * node)
 	Builder.SetInsertPoint(WhilecontBB);
 	Value* WhileVal = ConstantInt::get(myContext, APInt(32,1));
 	int n = (*node->getsubstate()).size();
-	for (int j=n-1;j>=0;j--)
+	if(node->getsubstate())
 	{
-		WhileVal = (*node->getsubstate())[j].first->accept(this);
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate())[i].second=="")
+			{;}
+			else
+			{
+				lables.insert(make_pair((*node->getsubstate())[i].second , createBB(mainFunc , (*node->getsubstate())[i].second)));
+			}
+		}
+	}
+	if(node->getsubstate())
+	{
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate())[i].second=="")
+			{;}
+			else
+			{
+				Builder.CreateBr(lables[(*node->getsubstate())[i].second]);
+				Builder.SetInsertPoint(lables[(*node->getsubstate())[i].second]);
+			}
+			WhileVal = (*node->getsubstate())[i].first->accept(this);
+		}
 	}
 	Builder.CreateBr(WhileBB);
 	Builder.SetInsertPoint(ContBB);
@@ -244,7 +308,24 @@ Value * Codegen::visit (class ASTwhileloop * node)
 	return ans;
 }
 Value * Codegen::visit (class ASTgoto * node)
-{}
+{
+	BasicBlock * mylabel = lables[node->getId()];
+	BasicBlock * nextBB = createBB(mainFunc , "nextgoto");
+	if(node->getexpr()==NULL)
+	{
+		Builder.CreateBr(mylabel);
+		Builder.SetInsertPoint(nextBB);
+	}
+	else
+	{
+		Value * cond = (node->getexpr())->accept(this);
+		Builder.CreateCondBr(cond , mylabel , nextBB);
+		Builder.SetInsertPoint(nextBB);
+	}
+	Value* ans = ConstantInt::get(myContext, APInt(32,1));
+	return ans;
+}
+
 Value * Codegen::visit (class ASTread * node)
 {
 	Value * var;
@@ -273,9 +354,31 @@ Value * Codegen::visit (class ASTif * node)
 	Builder.SetInsertPoint(IFBB);
 	Value* IFVal = ConstantInt::get(myContext, APInt(32,1));
 	int n = (*node->getsubstate()).size();
-	for (int j=n-1;j>=0;j--)
+	if(node->getsubstate())
 	{
-		IFVal = (*node->getsubstate())[j].first->accept(this);
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate())[i].second=="")
+			{;}
+			else
+			{
+				lables.insert(make_pair((*node->getsubstate())[i].second , createBB(mainFunc , (*node->getsubstate())[i].second)));
+			}
+		}
+	}
+	if(node->getsubstate())
+	{
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate())[i].second=="")
+			{;}
+			else
+			{
+				Builder.CreateBr(lables[(*node->getsubstate())[i].second]);
+				Builder.SetInsertPoint(lables[(*node->getsubstate())[i].second]);
+			}
+			IFVal = (*node->getsubstate())[i].first->accept(this);
+		}
 	}
 	Builder.CreateBr(ContBB);
 	// unsigned PhiBBSize = 1;
@@ -295,17 +398,61 @@ Value * Codegen::visit (class ASTifelse * node)
 	Builder.SetInsertPoint(IFBB);
 	Value* IFVal = ConstantInt::get(myContext, APInt(32,1));
 	int n = (*node->getsubstate1()).size();
-	for (int j=n-1;j>=0;j--)
+	if(node->getsubstate1())
 	{
-		IFVal = (*node->getsubstate1())[j].first->accept(this);
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate1())[i].second=="")
+			{;}
+			else
+			{
+				lables.insert(make_pair((*node->getsubstate1())[i].second , createBB(mainFunc , (*node->getsubstate1())[i].second)));
+			}
+		}
+	}
+	if(node->getsubstate1())
+	{
+		for (int i=n-1;i>=0;i--)
+		{
+			if((*node->getsubstate1())[i].second=="")
+			{;}
+			else
+			{
+				Builder.CreateBr(lables[(*node->getsubstate1())[i].second]);
+				Builder.SetInsertPoint(lables[(*node->getsubstate1())[i].second]);
+			}
+			IFVal = (*node->getsubstate1())[i].first->accept(this);
+		}
 	}
 	Builder.CreateBr(ContBB);
 	Builder.SetInsertPoint(ElseBB);
 	Value* ElseVal = ConstantInt::get(myContext, APInt(32,1));
 	int m = (*node->getsubstate2()).size();
-	for (int j=m-1;j>=0;j--)
+	if(node->getsubstate2())
 	{
-		ElseVal = (*node->getsubstate2())[j].first->accept(this);
+		for (int i=m-1;i>=0;i--)
+		{
+			if((*node->getsubstate2())[i].second=="")
+			{;}
+			else
+			{
+				lables.insert(make_pair((*node->getsubstate2())[i].second , createBB(mainFunc , (*node->getsubstate2())[i].second)));
+			}
+		}
+	}
+	if(node->getsubstate2())
+	{
+		for (int i=m-1;i>=0;i--)
+		{
+			if((*node->getsubstate2())[i].second=="")
+			{;}
+			else
+			{
+				Builder.CreateBr(lables[(*node->getsubstate2())[i].second]);
+				Builder.SetInsertPoint(lables[(*node->getsubstate2())[i].second]);
+			}
+			ElseVal = (*node->getsubstate2())[i].first->accept(this);
+		}
 	}
 	Builder.CreateBr(ContBB);
 	// unsigned PhiBBSize = 2;

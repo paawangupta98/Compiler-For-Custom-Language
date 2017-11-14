@@ -12,14 +12,13 @@ L1:	println "thisihs";
 	max=0;
 	sum=0;
 	read n;
-L2:	goto L1 if n==0;
+	goto L1 if n==0;
 	for i = 1 , n  { 
-		read ar[i];
+L2:		read ar[i];
 		if(max<ar[i])
 		{
 			max = ar[i];
 		}
-		goto L2;
 	}
 	i=1;
 	while(i<=n)
